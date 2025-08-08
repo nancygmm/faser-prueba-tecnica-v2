@@ -1,10 +1,15 @@
 <div class="container">
   <header class="header">
     <h1>{{ title }}</h1>
-    <button class="btn btn-primary" (click)="addTask()">
-      <span class="icon">+</span>
-      Agregar Tarea
-    </button>
+    <div style="display:flex; gap:8px;">
+      <button class="btn btn-primary" (click)="addTask()">
+        <span class="icon">+</span>
+        Agregar Tarea
+      </button>
+      <button class="btn" (click)="openBulkDialog()">
+        Carga masiva de tareas
+      </button>
+    </div>
   </header>
 
   <main class="main-content">
@@ -18,11 +23,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr
-            *ngFor="let task of tasks"
-            class="task-row"
-            (click)="openEditDialog(task)"
-          >
+          <tr *ngFor="let task of tasks" class="task-row" (click)="openEditDialog(task)">
             <td>{{ task.id }}</td>
             <td>{{ task.title }}</td>
             <td>{{ task.duration }}</td>
@@ -40,45 +41,24 @@
     </div>
   </main>
 </div>
-<!-- Acá ponemos la estructura que va a tener el popup/modal -->
-<div
-  class="dialog-backdrop" 
-  *ngIf="showDialog"
-  (click)="closeDialog()"
-  (keydown.escape)="closeDialog()"
->
-  <div
-    class="dialog"
-    role="dialog"
-    aria-modal="true"
-    aria-labelledby="taskDialogTitle"
-    (click)="$event.stopPropagation()"
-    tabindex="0"
-  >
+
+<!-- Modal para editar y eliminar -->
+<div class="dialog-backdrop" *ngIf="showDialog" (click)="closeDialog()" (keydown.escape)="closeDialog()">
+  <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="taskDialogTitle" (click)="$event.stopPropagation()" tabindex="0">
     <header class="dialog-header">
-      <h2 id="taskDialogTitle">
-        {{ editingTask ? 'Editar tarea' : 'Agregar tarea' }}
-      </h2>
+      <h2 id="taskDialogTitle">{{ editingTask ? 'Editar tarea' : 'Agregar tarea' }}</h2>
       <button class="icon-btn" (click)="closeDialog()" aria-label="Cerrar">✕</button>
     </header>
 
     <div class="dialog-body">
       <label class="form-row">
         <span>Título</span>
-        <input
-          type="text"
-          [(ngModel)]="formTitle"
-          placeholder="Ej: Hacer reporte"
-        />
+        <input type="text" [(ngModel)]="formTitle" />
       </label>
 
       <label class="form-row">
         <span>Duración (min)</span>
-        <input
-          type="number"
-          min="0"
-          [(ngModel)]="formDuration"
-        />
+        <input type="number" min="0" [(ngModel)]="formDuration" />
       </label>
     </div>
 
@@ -87,13 +67,29 @@
         {{ editingTask ? 'Guardar' : 'Agregar' }}
       </button>
       <button class="btn" (click)="closeDialog()">Cerrar</button>
-      <button
-        *ngIf="editingTask"
-        class="btn btn-danger"
-        (click)="deleteFromDialog()"
-      >
-        Eliminar
-      </button>
+      <button *ngIf="editingTask" class="btn btn-danger" (click)="deleteFromDialog()">Eliminar</button>
+    </footer>
+  </div>
+</div>
+
+<!-- Carga Masiva de tareas -->
+<div class="dialog-backdrop" *ngIf="showBulkDialog" (click)="closeBulkDialog()" (keydown.escape)="closeBulkDialog()">
+  <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="bulkDialogTitle" (click)="$event.stopPropagation()" tabindex="0">
+    <header class="dialog-header">
+      <h2 id="bulkDialogTitle">Carga masiva de tareas</h2>
+      <button class="icon-btn" (click)="closeBulkDialog()" aria-label="Cerrar">✕</button>
+    </header>
+
+    <div class="dialog-body">
+      <label class="form-row">
+        <span>Ingresa una tarea por línea (Título|Duración)</span>
+        <textarea [(ngModel)]="bulkText" rows="10" style="width:100%; resize:vertical; padding:8px; border:1px solid #dcdcdc; border-radius:8px; font-size:14px;"></textarea>
+      </label>
+    </div>
+
+    <footer class="dialog-footer">
+      <button class="btn btn-primary" (click)="processBulk()">Agregar</button>
+      <button class="btn" (click)="closeBulkDialog()">Cancelar</button>
     </footer>
   </div>
 </div>

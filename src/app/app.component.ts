@@ -18,6 +18,9 @@ export class AppComponent {
   formTitle = '';
   formDuration: number | null = null;
 
+  showBulkDialog = false;
+  bulkText = '';
+
   addTask() {
     this.editingTask = null;
     this.formTitle = '';
@@ -39,9 +42,7 @@ export class AppComponent {
     const title = (this.formTitle ?? '').trim();
     if (this.editingTask) {
       const idx = this.tasks.findIndex(t => t.id === this.editingTask!.id);
-      if (idx >= 0) {
-        this.tasks[idx] = { ...this.editingTask, title, duration };
-      }
+      if (idx >= 0) this.tasks[idx] = { ...this.editingTask, title, duration };
     } else {
       const newTask: Task = { id: Date.now(), title, duration };
       this.tasks.push(newTask);
@@ -61,5 +62,37 @@ export class AppComponent {
     this.formTitle = '';
     this.formDuration = null;
     document.body.style.overflow = '';
+  }
+
+  openBulkDialog() {
+    this.bulkText = '';
+    document.body.style.overflow = 'hidden';
+    this.showBulkDialog = true;
+  }
+
+  closeBulkDialog() {
+    this.showBulkDialog = false;
+    this.bulkText = '';
+    document.body.style.overflow = '';
+  }
+
+  processBulk() {
+    const lines = (this.bulkText || '')
+      .split(/\r?\n/)
+      .map(l => l.trim())
+      .filter(l => l.length > 0);
+
+    const ts = Date.now();
+    const parsed: Task[] = [];
+
+    lines.forEach((line, i) => {
+      const match = line.match(/\|\s*(\d+)\s*$/);
+      const duration = match ? parseInt(match[1], 10) : 10;
+      const title = match ? line.slice(0, match.index).trim() : line;
+      if (title) parsed.push({ id: ts + i, title, duration });
+    });
+
+    if (parsed.length) this.tasks = [...this.tasks, ...parsed];
+    this.closeBulkDialog();
   }
 }
