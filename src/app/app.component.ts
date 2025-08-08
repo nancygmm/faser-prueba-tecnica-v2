@@ -1,12 +1,12 @@
 import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { AddTaskDialogComponent } from './components/add-task-dialog/add-task-dialog.component';
+import { FormsModule } from '@angular/forms';
 import { Task } from './models/task.model';
 
 @Component({
   selector: 'app-root',
-  imports: [CommonModule, AddTaskDialogComponent],
+  standalone: true,
+  imports: [CommonModule, FormsModule],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
@@ -14,33 +14,52 @@ export class AppComponent {
   title = 'Control de Tareas - Nancy Mazariegos';
   tasks: Task[] = [];
   showDialog = false;
-  selectedTask: Task | null = null;
+  editingTask: Task | null = null;
+  formTitle = '';
+  formDuration: number | null = null;
 
   addTask() {
+    this.editingTask = null;
+    this.formTitle = '';
+    this.formDuration = null;
+    document.body.style.overflow = 'hidden';
     this.showDialog = true;
   }
 
-  onTaskAdded(newTask: Task) {
-    this.tasks.push(newTask);
-    this.showDialog = false;
+  openEditDialog(task: Task) {
+    this.editingTask = { ...task };
+    this.formTitle = task.title;
+    this.formDuration = task.duration;
+    document.body.style.overflow = 'hidden';
+    this.showDialog = true;
   }
 
-  onDialogClosed() {
-    this.showDialog = false;
-  }
-
-  selectTask(task: Task) {
-    this.selectedTask = task;
-  }
-
-  deleteTask() {
-    if (this.selectedTask) {
-      this.tasks = this.tasks.filter(task => task.id !== this.selectedTask!.id);
-      this.selectedTask = null;
+  saveFromDialog() {
+    const duration = Number(this.formDuration ?? 0);
+    const title = (this.formTitle ?? '').trim();
+    if (this.editingTask) {
+      const idx = this.tasks.findIndex(t => t.id === this.editingTask!.id);
+      if (idx >= 0) {
+        this.tasks[idx] = { ...this.editingTask, title, duration };
+      }
+    } else {
+      const newTask: Task = { id: Date.now(), title, duration };
+      this.tasks.push(newTask);
     }
+    this.closeDialog();
   }
 
-  isTaskSelected(task: Task): boolean {
-    return this.selectedTask?.id === task.id;
+  deleteFromDialog() {
+    if (!this.editingTask) return;
+    this.tasks = this.tasks.filter(t => t.id !== this.editingTask!.id);
+    this.closeDialog();
+  }
+
+  closeDialog() {
+    this.showDialog = false;
+    this.editingTask = null;
+    this.formTitle = '';
+    this.formDuration = null;
+    document.body.style.overflow = '';
   }
 }
