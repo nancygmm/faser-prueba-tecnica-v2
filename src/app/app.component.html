@@ -8,6 +8,9 @@
       </button>
       <button class="btn" (click)="openBulkDialog()">
         Carga masiva de tareas
+      </button> <!-- Botón donde conectamos el API Rest para agregar 5 tareas aleatorias -->
+      <button class="btn" (click)="fetchFromServer()">
+        Obtener de servidor
       </button>
     </div>
   </header>
@@ -42,26 +45,23 @@
   </main>
 </div>
 
-<!-- Modal para editar y eliminar -->
+<!-- Modal Editar/Eliminar, el modal aparecerá al darle click a una tarea existente para poder ya sea editarla o eliminarla -->
 <div class="dialog-backdrop" *ngIf="showDialog" (click)="closeDialog()" (keydown.escape)="closeDialog()">
   <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="taskDialogTitle" (click)="$event.stopPropagation()" tabindex="0">
     <header class="dialog-header">
       <h2 id="taskDialogTitle">{{ editingTask ? 'Editar tarea' : 'Agregar tarea' }}</h2>
       <button class="icon-btn" (click)="closeDialog()" aria-label="Cerrar">✕</button>
     </header>
-
     <div class="dialog-body">
       <label class="form-row">
         <span>Título</span>
         <input type="text" [(ngModel)]="formTitle" />
       </label>
-
       <label class="form-row">
         <span>Duración (min)</span>
         <input type="number" min="0" [(ngModel)]="formDuration" />
       </label>
     </div>
-
     <footer class="dialog-footer">
       <button class="btn btn-primary" (click)="saveFromDialog()">
         {{ editingTask ? 'Guardar' : 'Agregar' }}
@@ -72,21 +72,19 @@
   </div>
 </div>
 
-<!-- Carga Masiva de tareas -->
+<!-- Boton para la carga Masiva, acá mediante la estucutra indicada en el repositorio podemos agregar varias tareas de una sola vez  -->
 <div class="dialog-backdrop" *ngIf="showBulkDialog" (click)="closeBulkDialog()" (keydown.escape)="closeBulkDialog()">
   <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="bulkDialogTitle" (click)="$event.stopPropagation()" tabindex="0">
     <header class="dialog-header">
       <h2 id="bulkDialogTitle">Carga masiva de tareas</h2>
       <button class="icon-btn" (click)="closeBulkDialog()" aria-label="Cerrar">✕</button>
     </header>
-
     <div class="dialog-body">
       <label class="form-row">
-        <span>Ingresa una tarea por línea (Título|Duración)</span>
+        <span>Ingresa una tarea por línea (Título|Duración)</span> <!-- Acá indicamos la estructura en la que se tienen que ingresar las tareas -->
         <textarea [(ngModel)]="bulkText" rows="10" style="width:100%; resize:vertical; padding:8px; border:1px solid #dcdcdc; border-radius:8px; font-size:14px;"></textarea>
       </label>
     </div>
-
     <footer class="dialog-footer">
       <button class="btn btn-primary" (click)="processBulk()">Agregar</button>
       <button class="btn" (click)="closeBulkDialog()">Cancelar</button>
